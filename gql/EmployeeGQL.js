@@ -1,0 +1,230 @@
+const { gql } = require("apollo-server");
+// const  employees = require('../dummyEmp');
+const Employee = require("../models/Employee");
+
+const EmployeeTypeDefs = gql`
+  #graphql
+
+  type Employee {
+    id: ID!
+    firstName: String!
+    lastName: String!
+    email: String!
+    gender: String!
+    salary: Float!
+  }
+
+  type Query { # Display data
+    employees: [Employee] #return all employees
+    employeeById(id: ID!): Employee # return a single employee by id
+  }
+
+  type EmpResponse { # response message
+    message: String!
+    employee: Employee!
+  }
+
+  type DeleteMessage {
+    message: String!
+  }
+
+  type Mutation { # CRUD operations
+    addEmployee(
+      firstName: String!
+      lastName: String!
+      email: String!
+      gender: String!
+      salary: Float!
+    ): EmpResponse # add a new employee
+    
+    updateEmployeebyId(
+      id: ID!
+      firstName: String!
+      lastName: String!
+      email: String!
+      gender: String!
+      salary: Float!
+    ): EmpResponse # update an employee by id
+    deleteEmployeebyId(id: ID!): DeleteMessage # delete an employee by id
+  }
+`;
+// data types that we have are
+// int,float,string,boolean, ID
+
+// ! means that the field is required
+// if we don't put ! then the field is optional and can be null
+
+const EmployeeResolvers = {
+  Query: {
+    employees: async () => {
+      try {
+        const allEmployees = await Employee.find().exec();
+        return allEmployees;
+      } catch (err) {
+        throw new Error(err);
+      }
+    },
+
+    employeeById: async (parent, { id }) => {
+      try {
+        const employee = await Employee.findById(id).exec();
+        
+        //if employee is not found
+        if (!employee) {
+          throw new Error(`Employee ${id} is not found`);
+        }
+
+        return employee;
+        
+      } catch (err) {
+        throw new Error(err);
+      }
+    },
+  },
+
+  Mutation: {
+    addEmployee: async (parent, args) => {
+      try {
+        const newEmployee = new Employee({
+          ...args, //spread operator to get all the fields
+        });
+
+        // search if employee already exists
+        const existingEmployee = await Employee.findOne({
+          email: args.email,
+        }).exec();
+
+        if (existingEmployee) {
+          throw new Error("Employee already exists");
+        }else{
+
+          const savedEmp = await newEmployee.save();
+
+          if (savedEmp) {
+            return {
+              message: `Employee ${savedEmp.firstName} has been successfully added`,
+              employee: savedEmp,
+            };
+          }
+        }
+
+        
+      } catch (err) {
+        throw new Error(err);
+      }
+    },
+
+    updateEmployeebyId: async (parent, args) => {
+      try {
+        const updatedEmp = await Employee.findByIdAndUpdate(
+          args.id,
+          {
+            ...args,
+          },
+          { new: true }
+        ).exec(); //new: true returns the updated document
+
+        if (updatedEmp) {
+          return {
+            message: `Employee ${updatedEmp.firstName} has been successfully updated`,
+            employee: updatedEmp,
+          };
+        }
+      } catch (err) {
+        throw new Error(err);
+      }
+    },
+
+    deleteEmployeebyId: async (parent, { id }) => {
+      try {
+        const deletedEmp = await Employee.findByIdAndDelete(id).exec();
+        return {
+          message: `Employee ${deletedEmp.id} has been successfully deleted`,
+        };
+      } catch (err) {
+        throw new Error(err);
+      }
+    },
+  },
+};
+
+module.exports = { EmployeeTypeDefs, EmployeeResolvers };
+
+/*
+
+== EMPLOYEE BY LAST NAME ==
+query{
+  employeeByLastName(lastName: "Doe") {
+    id
+    firstName
+    lastName
+    email
+    gender
+    salary
+  }
+}
+
+== EMPLOYEE BY ID ==
+query {
+  employeeById(id: 65cdb452ee7db72f24580ea1) {
+    email
+    firstName
+    gender
+    lastName
+    id
+    salary
+  }
+}
+
+== EMPLOYEES ==
+query  {
+  employees {
+    email
+    firstName
+    gender
+    id
+    lastName
+    salary
+  }
+}
+
+== ADD EMPLOYEE ==
+mutation($addEmployeeId: ID!, $firstName: String!, $lastName: String!, $email: String!, $gender: String!, $salary: Float!){
+  addEmployee(id: $addEmployeeId, firstName: $firstName, lastName: $lastName, email: $email, gender: $gender, salary: $salary) {
+    message
+    employee {
+      id
+      firstName
+      lastName
+      email
+      gender
+      salary
+    }
+  }
+}
+
+
+== UPDATE EMPLOYEE ==
+mutation Mutation($updateEmployeebyIdId: ID!, $firstName: String!, $lastName: String!, $email: String!, $gender: String!, $salary: Float!) {
+  updateEmployeebyId(id: $updateEmployeebyIdId, firstName: $firstName, lastName: $lastName, email: $email, gender: $gender, salary: $salary) {
+    id
+    firstName
+    lastName
+    email
+    gender
+    salary
+  }
+}
+
+== DELETE EMPLOYEE ==
+mutation DeleteEmployeebyId($deleteEmployeebyIdId: ID!) {
+  deleteEmployeebyId(id: $deleteEmployeebyIdId) {
+    id
+    firstName
+    lastName
+    email
+    gender
+    salary
+  }
+}
+*/

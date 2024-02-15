@@ -24,8 +24,8 @@ mongoose.connect(DB_CONN, {
 });
 
 // Apollo GraphQL Server setup
-const {EmployeeTypeDefs, EmployeeResolvers} = require('./models/EmployeeGQL');
-const {UserTypeDefs, UserResolvers} = require('./models/UserGQL');
+const {EmployeeTypeDefs, EmployeeResolvers} = require('./gql/EmployeeGQL');
+const {UserTypeDefs, UserResolvers} = require('./gql/UserGQL');
 
 //combine all typeDefs and resolvers
 const typeDefs = [EmployeeTypeDefs, UserTypeDefs];

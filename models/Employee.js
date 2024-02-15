@@ -10,7 +10,6 @@ const employeeSchema = new mongoose.Schema({
     lastName: {
         type: String,
         required: [true, 'last name is required'],
-        unique: true
     },
 
     email: {
