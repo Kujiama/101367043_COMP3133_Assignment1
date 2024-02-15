@@ -5,14 +5,14 @@ const userSchema = new mongoose.Schema({
 
     username: {
         type: String,
-        required: [true, 'username is required'],
-        uniqe: true
+        unique: true,
+        required: [true, 'username is required']
     },
 
     email: {
         type: String,
         required: [true, 'email is required'],
-        uniqe: true,
+        unique: true,
         validate: {
             validator: function(v) {
                 return /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(v);

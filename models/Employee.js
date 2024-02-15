@@ -4,19 +4,19 @@ const employeeSchema = new mongoose.Schema({
     firstName: {
         type: String,
         required: [true, 'first name is required'],
-        uniqe: true
+        unique: true
     },
 
     lastName: {
         type: String,
         required: [true, 'last name is required'],
-        uniqe: true
+        unique: true
     },
 
     email: {
         type: String,
         required: [true, 'email is required'],
-        uniqe: true,
+        unique: true,
         validate: {
             validator: function(v) {
                 return /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(v);
