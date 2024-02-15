@@ -1,5 +1,4 @@
 const { gql } = require("apollo-server");
-// const  employees = require('../dummyEmp');
 const Employee = require("../models/Employee");
 
 const EmployeeTypeDefs = gql`
@@ -36,7 +35,7 @@ const EmployeeTypeDefs = gql`
       gender: String!
       salary: Float!
     ): EmpResponse # add a new employee
-    
+
     updateEmployeebyId(
       id: ID!
       firstName: String!
@@ -149,82 +148,3 @@ const EmployeeResolvers = {
 };
 
 module.exports = { EmployeeTypeDefs, EmployeeResolvers };
-
-/*
-
-== EMPLOYEE BY LAST NAME ==
-query{
-  employeeByLastName(lastName: "Doe") {
-    id
-    firstName
-    lastName
-    email
-    gender
-    salary
-  }
-}
-
-== EMPLOYEE BY ID ==
-query {
-  employeeById(id: 65cdb452ee7db72f24580ea1) {
-    email
-    firstName
-    gender
-    lastName
-    id
-    salary
-  }
-}
-
-== EMPLOYEES ==
-query  {
-  employees {
-    email
-    firstName
-    gender
-    id
-    lastName
-    salary
-  }
-}
-
-== ADD EMPLOYEE ==
-mutation($addEmployeeId: ID!, $firstName: String!, $lastName: String!, $email: String!, $gender: String!, $salary: Float!){
-  addEmployee(id: $addEmployeeId, firstName: $firstName, lastName: $lastName, email: $email, gender: $gender, salary: $salary) {
-    message
-    employee {
-      id
-      firstName
-      lastName
-      email
-      gender
-      salary
-    }
-  }
-}
-
-
-== UPDATE EMPLOYEE ==
-mutation Mutation($updateEmployeebyIdId: ID!, $firstName: String!, $lastName: String!, $email: String!, $gender: String!, $salary: Float!) {
-  updateEmployeebyId(id: $updateEmployeebyIdId, firstName: $firstName, lastName: $lastName, email: $email, gender: $gender, salary: $salary) {
-    id
-    firstName
-    lastName
-    email
-    gender
-    salary
-  }
-}
-
-== DELETE EMPLOYEE ==
-mutation DeleteEmployeebyId($deleteEmployeebyIdId: ID!) {
-  deleteEmployeebyId(id: $deleteEmployeebyIdId) {
-    id
-    firstName
-    lastName
-    email
-    gender
-    salary
-  }
-}
-*/

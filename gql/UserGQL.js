@@ -1,5 +1,4 @@
 const { gql } = require('apollo-server');
-// const users = require('../dummyUsers');
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
 

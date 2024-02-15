@@ -1,9 +1,10 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const { ApolloServer } = require('apollo-server');
+const { ApolloServer } = require('apollo-server-express');
 require('dotenv').config();
 
 const PORT = 4000;
+const app = express();
 
 // Mongoose MongoDB setup
 // Connect to MongoDB using environment variables
@@ -31,13 +32,20 @@ const {UserTypeDefs, UserResolvers} = require('./gql/UserGQL');
 const typeDefs = [EmployeeTypeDefs, UserTypeDefs];
 const resolvers = [EmployeeResolvers, UserResolvers];
 
-const server = new ApolloServer({ 
-    typeDefs: typeDefs,
-    resolvers: resolvers,
-    GraphiQL: true
-});
+async function startApolloServer(typeDefs, resolvers) {
+  const server = new ApolloServer({ 
+    typeDefs,
+    resolvers,
+    graphiql: true
+  });
 
-server.listen(PORT).then(({ url }) => {
-    console.log(`Server is running at ${url}`);
-});
+  await server.start();
 
+  server.applyMiddleware({ app, path: '/graphql' });
+
+  app.listen(PORT, () => {
+    console.log(`Server is running at http://localhost:${PORT}/graphql`);
+  });
+}
+
+startApolloServer(typeDefs, resolvers);
