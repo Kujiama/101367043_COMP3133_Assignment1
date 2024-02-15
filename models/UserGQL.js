@@ -1,5 +1,8 @@
 const { gql } = require('apollo-server');
-const users = require('../dummyUsers');
+// const users = require('../dummyUsers');
+const User = require('./User');
+const bcrypt = require('bcrypt');
+
 
 const UserTypeDefs = gql`#graphql
 
@@ -12,7 +15,7 @@ const UserTypeDefs = gql`#graphql
 
     type Query{ # Display data
         users: [User], #return all users
-        login(username: String!, password: String!): User # return a single user by id
+        login(username: String!, password: String!): UserResponse # return a single user by id
     }
 
     type UserResponse{ # response message
@@ -22,7 +25,6 @@ const UserTypeDefs = gql`#graphql
 
     type Mutation{ # CRUD operations
         signup(
-            id: ID!,
             username: String!,
             email: String!,
             password: String!
@@ -36,22 +38,50 @@ const UserTypeDefs = gql`#graphql
 const UserResolvers = {
 
     Query: {
-        users: () => {return users},
-        login: (parent, { email, password }) => {return users.find(user => user.email === email && user.password === password)},
+        users: async () => {
+            try{
+                const allUsers = await User.find().exec();
+                return allUsers;
+            }catch(err){
+                throw new Error(err);
+            }
+        },
+
+        login: async (parent, { username, password }) => {
+            try{
+                const user = await User.findOne({username: username}).exec();
+                
+                //using bcrypt to compare the password
+                const match = await bcrypt.compare(password, user.password);
+
+                if(match){
+                    return {
+                        message: `user ${user.username} has been successfully logged in`,
+                        user: user
+                    }
+                }
+            }catch(err){
+                throw new Error(err);
+            }
+        }
+                    
     },
 
     Mutation: {
-        signup: (parent, {id,username, email, password }) => {
-            const user = {
-                id,
-                username,
-                email,
-                password
-            }
-            users.push(user);
-            return {
-                message: "User added successfully",
-                user
+        signup: async (parent, args) => {
+            try{
+                const newUser = new User({...args});
+
+                const savedUser = await newUser.save();
+                
+                if(savedUser){
+                    return {
+                        message: `user ${args.username} has beensuccessfully added`,
+                        user: savedUser
+                    }
+                }
+            }catch(err){
+                throw new Error(err);
             }
         }
     }
