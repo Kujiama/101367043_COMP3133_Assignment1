@@ -38,12 +38,15 @@ const EmployeeTypeDefs = gql`
 
     updateEmployeebyId(
       id: ID!
-      firstName: String!
-      lastName: String!
-      email: String!
-      gender: String!
-      salary: Float!
+      
+      #optional fields as we only update the fields that we want
+      firstName: String
+      lastName: String
+      email: String
+      gender: String
+      salary: Float
     ): EmpResponse # update an employee by id
+    
     deleteEmployeebyId(id: ID!): DeleteMessage # delete an employee by id
   }
 `;
@@ -84,19 +87,19 @@ const EmployeeResolvers = {
   Mutation: {
     addEmployee: async (parent, args) => {
       try {
-        const newEmployee = new Employee({
-          ...args, //spread operator to get all the fields
-        });
-
         // search if employee already exists
         const existingEmployee = await Employee.findOne({
           email: args.email,
         }).exec();
-
+        
         if (existingEmployee) {
           throw new Error("Employee already exists");
         }else{
 
+          const newEmployee = new Employee({
+            ...args, //spread operator to get all the fields
+          });
+  
           const savedEmp = await newEmployee.save();
 
           if (savedEmp) {
@@ -106,8 +109,6 @@ const EmployeeResolvers = {
             };
           }
         }
-
-        
       } catch (err) {
         throw new Error(err);
       }

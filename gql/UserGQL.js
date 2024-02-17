@@ -50,10 +50,16 @@ const UserResolvers = {
             try{
                 const user = await User.findOne({username: username}).exec();
                 
-                //using bcrypt to compare the password
+                if(!user){
+                    throw new Error('User does not exist');
+                }
+
+                //using bcrypt to compare the password if user exists
                 const match = await bcrypt.compare(password, user.password);
 
-                if(match){
+                if(!match){
+                    throw new Error('Password is invalid');
+                }else{
                     return {
                         message: `user ${user.username} has been successfully logged in`,
                         user: user
@@ -71,14 +77,22 @@ const UserResolvers = {
             try{
                 const newUser = new User({...args});
 
+                // if user already exists
+                const existingUser = await User.findOne({username: args.username}).exec();
+
+                if(existingUser){
+                    throw new Error('User already exists');
+                }
+
                 const savedUser = await newUser.save();
                 
                 if(savedUser){
                     return {
-                        message: `user ${args.username} has beensuccessfully added`,
+                        message: `user ${args.username} has been successfully added`,
                         user: savedUser
                     }
                 }
+                
             }catch(err){
                 throw new Error(err);
             }
