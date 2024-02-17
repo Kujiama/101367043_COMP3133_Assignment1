@@ -1,7 +1,5 @@
 # COMP 3133 - Assignment 1
 
-This project is for the COMP 3133 course, focusing on Full Stack Development. It showcases the use of several technologies to create a functional web application.
-
 ## Technologies Used
 
 | Technology |  |
